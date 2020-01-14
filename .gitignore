@@ -12,8 +12,12 @@ proxychains4
 *~
 *.patch
 version.h
+build/
+cmake-build-debug/
+.*
 
 # Autoconf stuff 
 libtool
 config.*
 stamp-h
+!.gitignore

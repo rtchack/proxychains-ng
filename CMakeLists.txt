@@ -8,7 +8,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 add_definitions(-DDLL_NAME="${CMAKE_SHARED_LIBRARY_PREFIX}${lib_name}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 add_definitions(-DLIB_DIR="${PROJECT_BINARY_DIR}")
 add_definitions(-DSYSCONFDIR="/etc")
-add_definitions(-D_GNU_SOURCE)
+
+if (UNIX AND NOT APPLE)
+  add_definitions(-D_GNU_SOURCE)
+endif ()
+
+if (CMAKE_BUILD_TYPE EQUAL Debug OR CMAKE_BUILD_TYPE EQUAL debug OR CMAKE_BUILD_TYPE EQUAL DEBUG)
+  add_definitions(-DDEBUG)
+endif ()
 
 set(version_file ${PROJECT_BINARY_DIR}/version.h)
 include_directories(${PROJECT_BINARY_DIR})
@@ -34,15 +41,16 @@ set(src_files
     ${PROJECT_SOURCE_DIR}/src/version.c)
 
 add_library(${lib_name} SHARED ${src_files})
+target_link_libraries(${lib_name} pthread dl)
 add_dependencies(${lib_name} update_version)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/main.c)
-target_link_libraries(${PROJECT_NAME} ${lib_name} pthread dl)
+target_link_libraries(${PROJECT_NAME} ${lib_name})
 
 function(my_test name)
   set(tname test_${name})
   add_executable(${tname} ${PROJECT_SOURCE_DIR}/tests/${tname}.c)
-  target_link_libraries(${tname} ${lib_name} pthread dl)
+  target_link_libraries(${tname} ${lib_name})
 endfunction()
 
 my_test(getaddrinfo)
